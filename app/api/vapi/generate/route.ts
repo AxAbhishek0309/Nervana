@@ -1,13 +1,28 @@
 import { generateText } from "ai";
 import { google } from "@ai-sdk/google";
-
 import { db } from "@/firebase/admin";
 import { getRandomInterviewCover } from "@/lib/utils";
 
-export async function POST(request: Request) {
-  const { type, role, level, techstack, amount, userid } = await request.json();
+type RequestPayload = {
+  type: string;
+  role: string;
+  level: string;
+  techstack: string;
+  amount: number;
+  userid: string;
+};
 
+export async function POST(request: Request) {
   try {
+    const {
+      type,
+      role,
+      level,
+      techstack,
+      amount,
+      userid,
+    }: RequestPayload = await request.json();
+
     const { text: questions } = await generateText({
       model: google("gemini-2.0-flash-001"),
       prompt: `Prepare questions for a job interview.
@@ -21,15 +36,14 @@ export async function POST(request: Request) {
         Return the questions formatted like this:
         ["Question 1", "Question 2", "Question 3"]
         
-        Thank you! <3
-    `,
+        Thank you! <3`,
     });
 
     const interview = {
-      role: role,
-      type: type,
-      level: level,
-      techstack: techstack.split(","),
+      role,
+      type,
+      level,
+      techstack: techstack.split(",").map((t: string) => t.trim()),
       questions: JSON.parse(questions),
       userId: userid,
       finalized: true,
@@ -39,13 +53,21 @@ export async function POST(request: Request) {
 
     await db.collection("interviews").add(interview);
 
-    return Response.json({ success: true }, { status: 200 });
-  } catch (error) {
-    console.error("Error:", error);
-    return Response.json({ success: false, error: error }, { status: 500 });
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+    });
+  } catch (error: unknown) {
+    console.error("Error generating interview:", error);
+    return new Response(
+      JSON.stringify({ success: false, error: (error as Error).message }),
+      { status: 500 }
+    );
   }
 }
 
 export async function GET() {
-  return Response.json({ success: true, data: "Thank you!" }, { status: 200 });
+  return new Response(
+    JSON.stringify({ success: true, data: "Thank you!" }),
+    { status: 200 }
+  );
 }

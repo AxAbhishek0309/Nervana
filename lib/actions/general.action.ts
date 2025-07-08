@@ -33,9 +33,11 @@ export async function createFeedback(params: CreateFeedbackParams) {
         - **Problem-Solving**: Ability to analyze problems and propose solutions.
         - **Cultural & Role Fit**: Alignment with company values and job role.
         - **Confidence & Clarity**: Confidence in responses, engagement, and clarity.
-        `,
+        \n\nIMPORTANT: Do not include trailing commas in any arrays or objects in your JSON output.\n\n`,
       system:
         "You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories",
+      // Add a transform to sanitize trailing commas if needed
+      transform: (raw) => raw.replace(/,\s*([}\]])/g, '$1'),
     });
 
     const feedback = {
@@ -95,11 +97,16 @@ export async function getLatestInterviews(
 ): Promise<Interview[] | null> {
   const { userId, limit = 20 } = params;
 
+  if (!userId) {
+    console.error("❌ getLatestInterviews called without a valid userId");
+    return null;
+  }
+
   const interviews = await db
     .collection("interviews")
-    .orderBy("createdAt", "desc")
     .where("finalized", "==", true)
     .where("userId", "!=", userId)
+    .orderBy("createdAt", "desc")
     .limit(limit)
     .get();
 
@@ -109,9 +116,15 @@ export async function getLatestInterviews(
   })) as Interview[];
 }
 
+
 export async function getInterviewsByUserId(
-  userId: string
+  userId: string | undefined
 ): Promise<Interview[] | null> {
+  if (!userId) {
+    console.error("❌ getInterviewsByUserId called without a valid userId");
+    return null;
+  }
+
   const interviews = await db
     .collection("interviews")
     .where("userId", "==", userId)

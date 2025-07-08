@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { vapi } from "@/lib/vapi.sdk";
 import { interviewer } from "@/constants";
 import { createFeedback } from "@/lib/actions/general.action";
+import { Message } from "ai";
 
 enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -135,6 +136,8 @@ const Agent = ({
       await vapi.start(interviewer, {
         variableValues: {
           questions: formattedQuestions,
+          username: userName, // <-- Always pass username
+          userid: userId,     // <-- Always pass userid (optional)
         },
       });
     }

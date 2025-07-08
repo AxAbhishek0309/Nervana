@@ -10,13 +10,37 @@ import {
   getLatestInterviews,
 } from "@/lib/actions/general.action";
 
+import Spline from '@splinetool/react-spline';
+
+export const dynamic = "force-dynamic"; // Ensures fresh data on every request
+
 async function Home() {
   const user = await getCurrentUser();
 
-  const [userInterviews, allInterview] = await Promise.all([
-    getInterviewsByUserId(user?.id!),
-    getLatestInterviews({ userId: user?.id! }),
-  ]);
+  if (!user) {
+    return (
+      <section className="flex flex-col items-center justify-center min-h-screen text-center">
+        <h2 className="text-2xl font-semibold">You need to sign in first</h2>
+        <Button asChild className="btn-primary mt-4">
+          <Link href="/auth/sign-in">Sign In</Link>
+        </Button>
+      </section>
+    );
+  }
+
+  let userInterviews = null;
+  let allInterview = null;
+
+  try {
+    if (user?.id) {
+      [userInterviews, allInterview] = await Promise.all([
+        getInterviewsByUserId(user.id),
+        getLatestInterviews({ userId: user.id }),
+      ]);
+    }
+  } catch (error) {
+    console.error("Error fetching interview data:", error);
+  }
 
   const hasPastInterviews = userInterviews?.length! > 0;
   const hasUpcomingInterviews = allInterview?.length! > 0;
@@ -35,13 +59,9 @@ async function Home() {
           </Button>
         </div>
 
-        <Image
-          src="/robot.png"
-          alt="robo-dude"
-          width={400}
-          height={400}
-          className="max-sm:hidden"
-        />
+        <div className="max-sm:hidden w-[400px] h-[400px]">
+          <Spline scene="https://prod.spline.design/a0IsD2C6HpRtbyKI/scene.splinecode" />
+        </div>
       </section>
 
       <section className="flex flex-col gap-6 mt-8">

@@ -17,7 +17,7 @@ import {
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 
-import { signIn, signUp } from "@/lib/actions/auth.action";
+import { signUp } from "@/lib/actions/auth.action";
 import FormField from "./FormField";
 
 const authFormSchema = (type: FormType) => {
@@ -52,8 +52,10 @@ const AuthForm = ({ type }: { type: FormType }) => {
           password
         );
 
+        const uid = userCredential.user.uid;
+
         const result = await signUp({
-          uid: userCredential.user.uid,
+          uid,
           name: name!,
           email,
           password,
@@ -81,13 +83,24 @@ const AuthForm = ({ type }: { type: FormType }) => {
           return;
         }
 
-        await signIn({
-          email,
-          idToken,
+        // 🔥 Fetch to server-side API to set session cookie
+        const response = await fetch("/api/sign-in", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, idToken }),
         });
 
+        if (!response.ok) {
+          const error = await response.json();
+          toast.error(error.message || "Failed to sign in.");
+          return;
+        }
+
         toast.success("Signed in successfully.");
-        router.push("/");
+        router.push("/interview");
       }
     } catch (error) {
       console.log(error);
@@ -102,7 +115,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
       <div className="flex flex-col gap-6 card py-14 px-10">
         <div className="flex flex-row gap-2 justify-center">
           <Image src="/logo.svg" alt="logo" height={32} width={38} />
-          <h2 className="text-primary-100">PrepWise</h2>
+          <h2 className="text-primary-100">Nervana</h2>
         </div>
 
         <h3>Practice job interviews with AI</h3>
@@ -159,3 +172,4 @@ const AuthForm = ({ type }: { type: FormType }) => {
 };
 
 export default AuthForm;
+ 
