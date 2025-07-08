@@ -1,6 +1,5 @@
 <div align="center">
   <br />
-    <a href="https://www.youtube.com/watch?v=8GK8R77Bd7g" target="_blank">
       <img src="https://github.com/user-attachments/assets/1c0131c7-9f2d-4e3b-b47c-9679e76d8f9a" alt="Project Banner">
     </a>
   <br />
@@ -14,9 +13,7 @@
 
   <h3 align="center">Nervana: A job interview preparation platform powered by Vapi AI Voice agents</h3>
 
-   <div align="center">
-     Build this project step by step with our detailed tutorial on <a href="https://www.youtube.com/@javascriptmastery/videos" target="_blank"><b>JavaScript Mastery</b></a> YouTube. Join the JSM family!
-    </div>
+  
 </div>
 
 ## 📋 <a name="table">Table of Contents</a>
